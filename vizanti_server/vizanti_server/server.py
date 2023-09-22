@@ -11,6 +11,19 @@ from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
 
 from pathlib import Path
+import yaml
+from munch import munchify
+
+# this will be common for all ros2 robots branches will be differ
+robot_package = get_package_share_directory("ros2_robot")
+
+base_config_path = os.path.join(
+    robot_package, "configs", "monitoring_config.yaml")
+
+with open(base_config_path, "r") as file:
+    web_config = munchify(yaml.safe_load(file))
+
+websocket_port = web_config.websocket_port
 
 def get_public_dir():
     p = Path(__file__).resolve()
@@ -57,7 +70,7 @@ def get_paths(path, valid_extensions):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html',rosbridge_port=websocket_port)
 
 @app.route('/templates/files')
 def list_template_files():

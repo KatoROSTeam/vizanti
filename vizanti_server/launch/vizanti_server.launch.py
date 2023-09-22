@@ -16,7 +16,7 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {'authenticate': False},
-            {'port': 5001},
+            {'port': 45472},
             {'address': ''},
             {'retry_startup_delay': retry_startup_delay},
             {'fragment_timeout': fragment_timeout},
@@ -40,7 +40,7 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {'host': '0.0.0.0'},
-            {'port': 5000},
+            {'port': 12101},
             {'flask_debug': True}
         ]
     )

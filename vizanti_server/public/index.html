@@ -23,6 +23,10 @@
 	<script src="js/lib/quaternion.min.js"></script>
 	
 	<!-- modules -->
+	<script>
+        window.rosbridgePort = {{ rosbridge_port }};
+    </script>
+
 	<script type="module" src="js/modules/rosbridge.js"></script>
 	<script type="module" src="js/modules/persistent.js"></script>
 	<script type="module" src="js/modules/elements.js"></script>
