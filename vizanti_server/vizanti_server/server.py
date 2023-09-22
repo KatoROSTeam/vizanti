@@ -21,9 +21,9 @@ base_config_path = os.path.join(
     robot_package, "configs", "monitoring_config.yaml")
 
 with open(base_config_path, "r") as file:
-    web_config = munchify(yaml.safe_load(file))
+    monitoring_config = munchify(yaml.safe_load(file))
 
-websocket_port = web_config.rosbridge_port
+websocket_port = monitoring_config.web.rosbridge_port
 
 def get_public_dir():
     p = Path(__file__).resolve()
