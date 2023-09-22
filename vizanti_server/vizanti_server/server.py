@@ -23,7 +23,7 @@ base_config_path = os.path.join(
 with open(base_config_path, "r") as file:
     web_config = munchify(yaml.safe_load(file))
 
-websocket_port = web_config.websocket_port
+websocket_port = web_config.rosbridge_port
 
 def get_public_dir():
     p = Path(__file__).resolve()
