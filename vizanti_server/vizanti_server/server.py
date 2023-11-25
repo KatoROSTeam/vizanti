@@ -18,12 +18,12 @@ from munch import munchify
 robot_package = get_package_share_directory("ros2_robot")
 
 base_config_path = os.path.join(
-    robot_package, "configs", "autonomous_setup_config.yaml")
+    robot_package, "configs", "autoverse_config.yaml")
 
 with open(base_config_path, "r") as file:
-    autonomous_setup_config = munchify(yaml.safe_load(file))
+    autoverse_config = munchify(yaml.safe_load(file))
 
-websocket_port = autonomous_setup_config.web.rosbridge_port
+websocket_port = autoverse_config.web.rosbridge_port
 
 def get_public_dir():
     p = Path(__file__).resolve()
