@@ -1,0 +1,42 @@
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8); /* Transparent background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1); /* Light border color */
+  border-top: 4px solid #03A9F4; /* Cyber blue color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.content {
+  text-align: center;
+  padding: 20px;
+  display: none; /* Hide content initially */
+}
+
+/* Add some futuristic styling to the main content */
+h1 {
+  color: #03A9F4; /* Cyber blue color */
+}
+
+p {
+  font-size: 18px;
+  line-height: 1.6;
+}

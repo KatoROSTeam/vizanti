@@ -4,11 +4,6 @@
 		<p id="{uniqueID}_status" class="status">Status: Ok.</p>
 		<hr>
 
-		<label for="{uniqueID}_topic">Topic:</label>
-		<select id="{uniqueID}_topic" name="topic">
-			<option value="/initialpose">/initialpose</option>
-		</select>
-
 		<p>Start/stop mapping mode by service call a /switch_mode</p>
 
 		<p style="color:#b4b4b4;">Click the icon once to enable or disable mapping mode.</p>
@@ -20,5 +15,18 @@
 		<button id="{uniqueID}_remove" class="delete_button" onclick="removeWidget('{uniqueID}')">Remove Widget</button>
 
 		
+	</div>
+</div>
+
+<div id="{uniqueID}_loading_modal" class="modal_outer noselect">
+	<div class="modal_inner noselect">
+	  <link rel="stylesheet" href="css/loading_styles.css">
+	  <div class="loading-screen" id="loadingScreen">
+		  <div class="spinner"></div>
+		  <p>Loading...</p>
+	  </div>
+	  <div class="content" id="content" style="display: none;">
+		<h1>Main Content</h1>
+	  </div>
 	</div>
 </div>

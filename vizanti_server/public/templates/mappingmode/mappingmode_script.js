@@ -30,56 +30,6 @@ function saveSettings(){
 	settings.save();
 }
 
-function sendMessage(pos, delta){
-	if(!pos || !delta){
-		status.setError("Could not send message, pose invalid.");
-		return;
-	}
-
-	let yaw = Math.atan2(delta.y, -delta.x);
-	let quat = Quaternion.fromEuler(yaw, 0, 0, 'ZXY');
-
-	let map_pos = view.screenToFixed(pos);
-
-	const currentTime = new Date();
-	const currentTimeSecs = Math.floor(currentTime.getTime() / 1000);
-	const currentTimeNsecs = (currentTime.getTime() % 1000) * 1e6;
-
-	const publisher = new ROSLIB.Topic({
-		ros: rosbridge.ros,
-		name: topic,
-		messageType: 'geometry_msgs/msg/PoseWithCovarianceStamped',
-	});
-
-	const poseMessage = new ROSLIB.Message({
-		header: {
-			stamp: {
-				secs: currentTimeSecs,
-      			nsecs: currentTimeNsecs
-			},
-			frame_id: tf.fixed_frame
-		},
-		pose: {
-			pose: {
-				position: {
-					x: map_pos.x,
-					y: map_pos.y,
-					z: 0.0
-				},
-				orientation: {
-					x: quat.x,
-					y: quat.y,
-					z: quat.z,
-					w: quat.w
-				}
-			},
-			covariance: [0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06853892326654787]
-		}
-	});	
-	publisher.publish(poseMessage);
-
-	status.setOK();
-}
 
 const canvas = document.getElementById('{uniqueID}_canvas');
 const ctx = canvas.getContext('2d');
@@ -93,53 +43,6 @@ let start_point = undefined;
 let delta = undefined;
 sprite.src = "assets/initialpose.png";
 icon.style.backgroundColor = "rgba(255, 54, 54, 1.0)";
-
-function drawArrow() {
-    const wid = canvas.width;
-    const hei = canvas.height;
-
-    ctx.clearRect(0, 0, wid, hei);
-
-	if(delta){
-		let ratio = sprite.naturalHeight/sprite.naturalWidth;
-
-		ctx.save();
-		ctx.translate(start_point.x, start_point.y);
-		ctx.scale(1.0, 1.0);
-		ctx.rotate(Math.atan2(-delta.y, -delta.x));
-		ctx.drawImage(sprite, -80, -80*ratio, 160, 160*ratio);
-		ctx.restore();
-	}
-}
-
-function startDrag(event){
-	const { clientX, clientY } = event.touches ? event.touches[0] : event;
-	start_point = {
-		x: clientX,
-		y: clientY
-	};
-}
-
-function drag(event){
-	if (start_point === undefined) return;
-
-	const { clientX, clientY } = event.touches ? event.touches[0] : event;
-	delta = {
-		x: start_point.x - clientX,
-		y: start_point.y - clientY,
-	};
-
-	drawArrow();	
-}
-
-function endDrag(event){
-	sendMessage(start_point, delta);
-
-	start_point = undefined;
-	delta = undefined;
-	drawArrow();
-	setActive(false);
-}
 
 function resizeScreen(){
 	canvas.height = window.innerHeight;
@@ -155,33 +58,16 @@ function sendServiceRequestmode(val){
 		name: '/switch_mode',
 		serviceType: 'algorithm_interfaces/srv/ModeSwitch'
 	});
+	openModal("{uniqueID}_loading_modal");
 	client.callService(request, function(result) {
 		console.log("Result from service call " + result.reason);
+		closeModal("{uniqueID}_loading_modal");
 	});
+	
 }
 
 window.addEventListener('resize', resizeScreen);
 window.addEventListener('orientationchange', resizeScreen);
-
-function addListeners(){
-	view_container.addEventListener('mousedown', startDrag);
-	view_container.addEventListener('mousemove', drag);
-	view_container.addEventListener('mouseup', endDrag);
-
-	view_container.addEventListener('touchstart', startDrag);
-	view_container.addEventListener('touchmove', drag);
-	view_container.addEventListener('touchend', endDrag);	
-}
-
-function removeListeners(){
-	view_container.removeEventListener('mousedown', startDrag);
-	view_container.removeEventListener('mousemove', drag);
-	view_container.removeEventListener('mouseup', endDrag);
-
-	view_container.removeEventListener('touchstart', startDrag);
-	view_container.removeEventListener('touchmove', drag);
-	view_container.removeEventListener('touchend', endDrag);	
-}
 
 function setActive(value){
 	active = value;
@@ -202,33 +88,33 @@ function setActive(value){
 
 // Topics
 
-const selectionbox = document.getElementById("{uniqueID}_topic");
+// const selectionbox = document.getElementById("{uniqueID}_topic");
 
-async function loadTopics(){
-	let result = await rosbridge.get_topics("geometry_msgs/msg/PoseWithCovarianceStamped");
+// async function loadTopics(){
+// 	let result = await rosbridge.get_topics("geometry_msgs/msg/PoseWithCovarianceStamped");
 
-	let topiclist = "";
-	result.forEach(element => {
-		topiclist += "<option value='"+element+"'>"+element+"</option>"
-	});
-	selectionbox.innerHTML = topiclist
+// 	let topiclist = "";
+// 	result.forEach(element => {
+// 		topiclist += "<option value='"+element+"'>"+element+"</option>"
+// 	});
+// 	selectionbox.innerHTML = topiclist
 
-	if(result.includes(topic)){
-		selectionbox.value = topic;
-	}else{
-		topiclist += "<option value='"+topic+"'>"+topic+"</option>"
-		selectionbox.innerHTML = topiclist
-		selectionbox.value = topic;
-	}
-}
+// 	if(result.includes(topic)){
+// 		selectionbox.value = topic;
+// 	}else{
+// 		topiclist += "<option value='"+topic+"'>"+topic+"</option>"
+// 		selectionbox.innerHTML = topiclist
+// 		selectionbox.value = topic;
+// 	}
+// }
 
-selectionbox.addEventListener("change", (event) => {
-	topic = selectionbox.value;
-	saveSettings();
-	status.setOK();
-});
+// selectionbox.addEventListener("change", (event) => {
+// 	topic = selectionbox.value;
+// 	saveSettings();
+// 	status.setOK();
+// });
 
-loadTopics();
+// loadTopics();
 
 // Long press modal open stuff
 
@@ -258,7 +144,7 @@ function startLongPress(event) {
 	isLongPress = false;
 	longPressTimer = setTimeout(() => {
 		isLongPress = true;
-		loadTopics();
+		// loadTopics();
 		openModal("{uniqueID}_modal");
 	}, 500);
 }

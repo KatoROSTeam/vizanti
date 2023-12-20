@@ -69,13 +69,14 @@ function sendServiceRequestmode(val){
 window.addEventListener('resize', resizeScreen);
 window.addEventListener('orientationchange', resizeScreen);
 
+
 function setActive(value){
 	active = value;
 	// view.setInputMovementEnabled(!active);
 
 	if(active){
 		// addListeners();
-		var val = 3
+		var val = 2
 		sendServiceRequestmode(val);
 		icon.style.backgroundColor = "rgba(104, 255, 104, 1.0)";
 	}else{
@@ -155,4 +156,4 @@ function cancelLongPress(event) {
 
 resizeScreen();
 
-console.log("Navigation mode Widget Loaded {uniqueID}")
+console.log("Recording mode Widget Loaded {uniqueID}")
