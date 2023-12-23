@@ -73,18 +73,35 @@ const loadTopicBox = document.getElementById("{uniqueID}_loadtopic");
 const savePathBox = document.getElementById("{uniqueID}_savepath");
 const loadButton = document.getElementById('{uniqueID}_load');
 const saveButton = document.getElementById('{uniqueID}_save');
+const downloadPgm = document.getElementById('{uniqueID}_download_button_p');
+const downloadYaml = document.getElementById('{uniqueID}_download_button_y');
+const downloadText = document.getElementById('{uniqueID}_download');
 
 const costmapCheckbox = document.getElementById('{uniqueID}_costmap_mode');
 costmapCheckbox.addEventListener('change', saveSettings);
 
+downloadPgm.addEventListener('click', async() =>{
+	let name = downloadText.value
+	var location = window.location.protocol + '//' + window.location.hostname + ':8000/' + name + ".pgm"
+	window.location.href = location
+});
+
+downloadYaml.addEventListener('click', async() =>{
+	let name = downloadText.value
+	var location = window.location.protocol + '//' + window.location.hostname + ':8000/' + name + ".yaml"
+	window.location.href = location
+});
+
+
+
 loadButton.addEventListener('click',  async () => {
 	let path = loadPathBox.value;
 
-	if (path.endsWith(".pgm")) {
-		path = path.slice(0, -4) + ".yaml";
-	} else if (!path.endsWith(".yaml")) {
-		path += ".yaml";
-	}
+	// if (path.endsWith(".pgm")) {
+	// 	path = path.slice(0, -4) + ".yaml";
+	// } else if (!path.endsWith(".yaml")) {
+	// 	path += ".yaml";
+	// }
 
 	loadPathBox.value = path;
 

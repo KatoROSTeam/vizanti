@@ -5,6 +5,7 @@ import { settings } from '/js/modules/persistent.js';
 import { Status } from '/js/modules/status.js';
 
 let topic = getTopic("{uniqueID}");
+const loadPathBox = document.getElementById("{uniqueID}_savepath");
 let status = new Status(
 	document.getElementById("{uniqueID}_icon"),
 	document.getElementById("{uniqueID}_status")
@@ -52,7 +53,8 @@ function resizeScreen(){
 
 function sendServiceRequestmode(val){
     var request = new ROSLIB.ServiceRequest({
-		mode: val
+		mode: val,
+		pose_file_name: loadPathBox.value
 	});
 	var client = new ROSLIB.Service({
 		ros: rosbridge.ros,

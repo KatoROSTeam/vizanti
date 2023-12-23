@@ -5,6 +5,8 @@ import sys
 import rclpy
 import yaml
 import json
+import time
+from ament_index_python.packages import get_package_share_directory
 
 from rclpy.node import Node
 
@@ -12,6 +14,7 @@ from rclpy.executors import  MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 
 from std_srvs.srv import Trigger
+from cartographer_ros_msgs.srv import WriteState
 from vizanti_msgs.srv import GetNodeParameters, SetNodeParameter
 from vizanti_msgs.srv import LoadMap, SaveMap
 from vizanti_msgs.srv import RecordRosbag
@@ -40,6 +43,8 @@ class ServiceHandler(Node):
 
         self.list_packages_service = self.create_service(ListPackages, 'vizanti/list_packages', self.list_packages_callback, callback_group=group)
         self.list_executables_service = self.create_service(ListExecutables, 'vizanti/list_executables', self.list_executables_callback, callback_group=group)
+
+        self.carto_state_client = self.create_client(WriteState, '/write_state')
 
         self.get_logger().info("Service handler ready.")
 
@@ -167,37 +172,63 @@ class ServiceHandler(Node):
         return res
 
     def load_map(self, req, res):
+
         file_path = os.path.expanduser(req.file_path)
         topic = req.topic
+
         try:
-            process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_server", file_path, "map:=" + topic, "__name:=vizanti_map_server"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
-            fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+            robot = get_package_share_directory('ros2_robot')
+            path = os.path.join(robot,'configs','slam_config.yaml')
+            with open(path, 'r') as file:
+                data = yaml.safe_load(file)
 
-            # Wait for it to either fail or not
-            rclpy.sleep(1)
+            data['map_yaml'] = str(file_path) + ".yaml"
 
-            # Check if the process is still running
-            if process.poll() is not None:
-                # Process terminated, read the error output
-                error_output = process.stdout.read().decode('utf-8')
-                res.success = False
-                res.message = "Map server failed to load the map: " + error_output
-            else:
-                res.success = True
-                res.message = "Map loaded successfully"
+            if data['localization_algorithim'] == "cartographer":
+                data['cartographer']['state_file'] = str(file_path) + ".pbstream"
+
+            with open(path, 'w') as file:
+                data = yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+            res.success = True
+            res.message = "Map Switch Successful"
+        
         except Exception as e:
             res.success = False
             res.message = str(e)
+
+        # try:
+        #     process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_server", file_path, "map:=" + topic, "__name:=vizanti_map_server"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #     flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
+        #     fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
+        #     # Wait for it to either fail or not
+        #     rclpy.sleep(1)
+
+        #     # Check if the process is still running
+        #     if process.poll() is not None:
+        #         # Process terminated, read the error output
+        #         error_output = process.stdout.read().decode('utf-8')
+        #         res.success = False
+        #         res.message = "Map server failed to load the map: " + error_output
+        #     else:
+        #         res.success = True
+        #         res.message = "Map loaded successfully"
+        # except Exception as e:
+        #     res.success = False
+        #     res.message = str(e)
         return res
 
     def save_map(self, req, res):
         file_path = os.path.expanduser(req.file_path)
         topic = req.topic
         try:
-            process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_saver", "-f", file_path, "map:=" + topic, "__name:=vizanti_map_saver"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_saver_cli", "-f", file_path, "-t" , topic, '--free', '0.196'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
             fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+            robot = get_package_share_directory('ros2_robot')
+            path = os.path.join(robot,'configs','slam_config.yaml')
+            with open(path, 'r') as file:
+                data = yaml.safe_load(file)
 
             while True:
                 # Check if the process is still running
@@ -219,7 +250,11 @@ class ServiceHandler(Node):
                         break
 
                 # Sleep for a short period of time to avoid excessive CPU usage
-                rclpy.sleep(0.2)
+                time.sleep(0.2)
+            if data['localization_algorithim'] == 'cartographer':
+                writestate_req = WriteState.Request()
+                writestate_req.filename = file_path + ".pbstream"
+                self.carto_state_client.call_async(writestate_req)
 
             res.success = True
             res.message = "Map saved successfully"
