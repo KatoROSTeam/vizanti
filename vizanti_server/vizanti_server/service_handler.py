@@ -177,7 +177,7 @@ class ServiceHandler(Node):
         topic = req.topic
 
         try:
-            robot = get_package_share_directory('ros2_robot')
+            robot = get_package_share_directory('tweaks')
             path = os.path.join(robot,'configs','slam_config.yaml')
             with open(path, 'r') as file:
                 data = yaml.safe_load(file)
@@ -225,7 +225,7 @@ class ServiceHandler(Node):
             process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_saver_cli", "-f", file_path, "-t" , topic, '--free', '0.196'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
             fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-            robot = get_package_share_directory('ros2_robot')
+            robot = get_package_share_directory('tweaks')
             path = os.path.join(robot,'configs','slam_config.yaml')
             with open(path, 'r') as file:
                 data = yaml.safe_load(file)

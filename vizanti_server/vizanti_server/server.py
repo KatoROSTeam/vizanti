@@ -15,7 +15,7 @@ import yaml
 from munch import munchify
 
 # this will be common for all ros2 robots branches will be differ
-robot_package = get_package_share_directory("ros2_robot")
+robot_package = get_package_share_directory("tweaks")
 
 base_config_path = os.path.join(
     robot_package, "configs", "autoverse_config.yaml")
