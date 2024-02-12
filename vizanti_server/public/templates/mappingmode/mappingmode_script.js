@@ -56,7 +56,7 @@ function sendServiceRequestmode(val){
 	var client = new ROSLIB.Service({
 		ros: rosbridge.ros,
 		name: '/switch_mode',
-		serviceType: 'algorithm_interfaces/srv/ModeSwitch'
+		serviceType: 'apex_goat_feature_interfaces/srv/ModeSwitch'
 	});
 	openModal("{uniqueID}_loading_modal");
 	client.callService(request, function(result) {
