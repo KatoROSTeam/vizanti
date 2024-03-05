@@ -178,7 +178,7 @@ class ServiceHandler(Node):
 
         try:
             robot = get_package_share_directory('tweaks')
-            path = os.path.join(robot,'configs','slam_config.yaml')
+            path = os.path.join(robot,'configs','perception_config.yaml')
             with open(path, 'r') as file:
                 data = yaml.safe_load(file)
 
@@ -226,7 +226,7 @@ class ServiceHandler(Node):
             flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
             fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
             robot = get_package_share_directory('tweaks')
-            path = os.path.join(robot,'configs','slam_config.yaml')
+            path = os.path.join(robot,'configs','perception_config.yaml')
             with open(path, 'r') as file:
                 data = yaml.safe_load(file)
 
