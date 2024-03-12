@@ -6,24 +6,15 @@ import rclpy
 
 from flask import Flask, render_template, send_from_directory, make_response
 from werkzeug.serving import make_server, WSGIRequestHandler
+from apex_goat_package_manager.apex_configuration import Configs
 
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
 
 from pathlib import Path
-import yaml
-from munch import munchify
 
-# this will be common for all ros2 robots branches will be differ
-robot_package = get_package_share_directory("tweaks")
+websocket_port = Configs.autoverse_config.web.rosbridge_port
 
-base_config_path = os.path.join(
-    robot_package, "configs", "autoverse_config.yaml")
-
-with open(base_config_path, "r") as file:
-    autoverse_config = munchify(yaml.safe_load(file))
-
-websocket_port = autoverse_config.web.rosbridge_port
 
 def get_public_dir():
     p = Path(__file__).resolve()
