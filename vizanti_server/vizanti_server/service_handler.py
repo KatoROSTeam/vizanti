@@ -8,6 +8,8 @@ import json
 import time
 from ament_index_python.packages import get_package_share_directory
 from apex_goat_package_manager.apex_configuration import Configs
+from ruamel.yaml import YAML
+rua_yaml = YAML()
 
 from rclpy.node import Node
 
@@ -181,12 +183,12 @@ class ServiceHandler(Node):
             robot = get_package_share_directory('tweaks')
             path = os.path.join(robot,'configs','web_sync_config.yaml')
             with open(path, 'r') as file:
-                data = yaml.safe_load(file)
+                data = rua_yaml.load(file)
 
             data['perception_config']['map_file_name'] = str(os.path.basename(file_path)) 
 
             with open(path, 'w') as file:
-                data = yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+                data = rua_yaml.dump(data, file)
             res.success = True
             res.message = "Map Switch Successful"
         
