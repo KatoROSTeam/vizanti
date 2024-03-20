@@ -7,6 +7,7 @@ import yaml
 import json
 import time
 from ament_index_python.packages import get_package_share_directory
+from apex_goat_package_manager.apex_configuration import Configs
 
 from rclpy.node import Node
 
@@ -178,14 +179,11 @@ class ServiceHandler(Node):
 
         try:
             robot = get_package_share_directory('tweaks')
-            path = os.path.join(robot,'configs','perception_config.yaml')
+            path = os.path.join(robot,'configs','web_sync_config.yaml')
             with open(path, 'r') as file:
                 data = yaml.safe_load(file)
 
-            data['map_yaml'] = str(file_path) + ".yaml"
-
-            if data['localization_algorithim'] == "cartographer":
-                data['cartographer']['state_file'] = str(file_path) + ".pbstream"
+            data['perception_config']['map_file_name'] = str(os.path.basename(file_path)) 
 
             with open(path, 'w') as file:
                 data = yaml.dump(data, file, default_flow_style=False, sort_keys=False)
@@ -195,27 +193,6 @@ class ServiceHandler(Node):
         except Exception as e:
             res.success = False
             res.message = str(e)
-
-        # try:
-        #     process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_server", file_path, "map:=" + topic, "__name:=vizanti_map_server"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #     flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
-        #     fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-
-        #     # Wait for it to either fail or not
-        #     rclpy.sleep(1)
-
-        #     # Check if the process is still running
-        #     if process.poll() is not None:
-        #         # Process terminated, read the error output
-        #         error_output = process.stdout.read().decode('utf-8')
-        #         res.success = False
-        #         res.message = "Map server failed to load the map: " + error_output
-        #     else:
-        #         res.success = True
-        #         res.message = "Map loaded successfully"
-        # except Exception as e:
-        #     res.success = False
-        #     res.message = str(e)
         return res
 
     def save_map(self, req, res):
@@ -225,10 +202,6 @@ class ServiceHandler(Node):
             process = subprocess.Popen(["ros2", "run", "nav2_map_server", "map_saver_cli", "-f", file_path, "-t" , topic, '--free', '0.196'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
             fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-            robot = get_package_share_directory('tweaks')
-            path = os.path.join(robot,'configs','perception_config.yaml')
-            with open(path, 'r') as file:
-                data = yaml.safe_load(file)
 
             while True:
                 # Check if the process is still running
@@ -251,7 +224,7 @@ class ServiceHandler(Node):
 
                 # Sleep for a short period of time to avoid excessive CPU usage
                 time.sleep(0.2)
-            if data['localization_algorithim'] == 'cartographer':
+            if Configs.perception_config.mapping.algorithm == 'cartographer':
                 writestate_req = WriteState.Request()
                 writestate_req.filename = file_path + ".pbstream"
                 self.carto_state_client.call_async(writestate_req)
